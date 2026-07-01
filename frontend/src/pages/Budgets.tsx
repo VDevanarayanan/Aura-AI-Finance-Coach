@@ -60,6 +60,14 @@ export const Budgets: React.FC = () => {
     if (!newCategory || !newLimit) return;
 
     setError(null);
+    const categoryExists = budgets.some(
+      (b) => b.category.trim().toLowerCase() === newCategory.trim().toLowerCase()
+    );
+    if (categoryExists) {
+      setError(`A budget for category '${newCategory}' already exists for this month.`);
+      return;
+    }
+
     try {
       await addBudget(newCategory, parseFloat(newLimit));
       setIsAddOpen(false);
@@ -106,10 +114,15 @@ export const Budgets: React.FC = () => {
     }
   };
 
-  // Find overall monthly budget (category: 'Overall')
-  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'overall');
+  // Find overall monthly budget (category: 'Entire')
+  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'entire');
   // Filter out overall budget for the category sub-budgets grid
-  const categoryBudgets = budgets.filter((b) => b.category.toLowerCase() !== 'overall');
+  const categoryBudgets = budgets.filter((b) => b.category.toLowerCase() !== 'entire');
+
+  // Filter out categories that already have budgets from the creation dropdown (except 'Other')
+  const availableCategories = categories.filter(
+    (c) => c === 'Other' || !budgets.some((b) => b.category.toLowerCase() === c.toLowerCase())
+  );
 
   // Compute total expenses for current selected month to show in overall budget card
   const totalExpenses = transactions
@@ -210,14 +223,14 @@ export const Budgets: React.FC = () => {
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-zinc-200">No Overall Monthly Budget Set</h4>
+                <h4 className="text-sm font-bold text-zinc-200">No Entire Monthly Budget Set</h4>
                 <p className="text-xs text-zinc-500 mt-0.5">Initialize your monthly spending limit to unlock full dashboard tracking.</p>
               </div>
             </div>
             <Button
               onClick={() => {
                 setIsCustomCategory(false);
-                setNewCategory('Overall');
+                setNewCategory('Entire');
                 setIsAddOpen(true);
               }}
               variant="secondary"
@@ -346,7 +359,7 @@ export const Budgets: React.FC = () => {
               className="h-10 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3.5 text-sm text-zinc-200 focus:outline-none"
             >
               <option value="">Select a category...</option>
-              {categories.map((c) => (
+              {availableCategories.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>

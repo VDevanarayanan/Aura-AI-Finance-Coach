@@ -33,16 +33,16 @@ export const Dashboard: React.FC = () => {
   const { transactions, budgets, savingsGoals, currentMonth, setCurrentMonth, addBudget } =
     useFinance();
 
-  const [newOverallLimit, setNewOverallLimit] = useState('');
+  const [newEntireLimit, setNewEntireLimit] = useState('');
   const [setupError, setSetupError] = useState<string | null>(null);
 
-  const handleSetupOverallBudget = async (e: React.FormEvent) => {
+  const handleSetupEntireBudget = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newOverallLimit || isNaN(parseFloat(newOverallLimit))) return;
+    if (!newEntireLimit || isNaN(parseFloat(newEntireLimit))) return;
     try {
-      await addBudget('Overall', parseFloat(newOverallLimit));
+      await addBudget('Entire', parseFloat(newEntireLimit));
       setSetupError(null);
-      setNewOverallLimit('');
+      setNewEntireLimit('');
     } catch (err: any) {
       setSetupError(err.message || 'Failed to set budget.');
     }
@@ -62,8 +62,8 @@ export const Dashboard: React.FC = () => {
 
   const totalSavings = totalIncome - totalExpenses;
 
-  // Monthly overall budget is categorized as 'Overall'
-  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'overall');
+  // Monthly overall budget is categorized as 'Entire'
+  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'entire');
   const totalBudgetLimit = overallBudget ? overallBudget.limitAmount : 0;
   const budgetRemaining = Math.max(totalBudgetLimit - totalExpenses, 0);
   const budgetSpentPercentage =
@@ -175,7 +175,7 @@ export const Dashboard: React.FC = () => {
             </Card.Description>
           </Card.Header>
           <Card.Content>
-            <form onSubmit={handleSetupOverallBudget} className="space-y-4">
+            <form onSubmit={handleSetupEntireBudget} className="space-y-4">
               {setupError && (
                 <div className="p-3 bg-red-950/30 text-red-400 border border-red-900/50 text-xs font-semibold rounded-xl">
                   {setupError}
@@ -185,8 +185,8 @@ export const Dashboard: React.FC = () => {
                 label="Monthly Spend Limit (₹)"
                 type="number"
                 placeholder="e.g. 35000"
-                value={newOverallLimit}
-                onChange={(e) => setNewOverallLimit(e.target.value)}
+                value={newEntireLimit}
+                onChange={(e) => setNewEntireLimit(e.target.value)}
                 required
               />
               <Button
