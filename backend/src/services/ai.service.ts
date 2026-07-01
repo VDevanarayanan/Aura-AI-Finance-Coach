@@ -168,6 +168,9 @@ JSON output:`;
       category = 'Travel';
       merchant = cleanDesc.includes('uber') ? 'Uber' : cleanDesc.includes('ola') ? 'Ola' : null;
       title = 'Travel Expense';
+    } else if (cleanDesc.includes('saving') || cleanDesc.includes('save') || cleanDesc.includes('invest') || cleanDesc.includes('mutual fund') || cleanDesc.includes('stock') || cleanDesc.includes('deposit')) {
+      category = 'Savings';
+      title = 'Savings & Investment';
     }
 
     return {

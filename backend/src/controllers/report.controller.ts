@@ -53,6 +53,7 @@ export const getMonthlyReport = async (req: AuthenticatedRequest, res: Response)
     });
 
     const savings = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? Math.round((savings / totalIncome) * 100) : 0;
 
     // Convert category spending to array
     const spendingByCategory = Object.entries(categoryMap).map(([category, amount]) => ({
@@ -86,6 +87,7 @@ export const getMonthlyReport = async (req: AuthenticatedRequest, res: Response)
       totalIncome,
       totalExpenses,
       savings,
+      savingsRate,
       largestSpendingCategory,
       spendingByCategory,
       spendingTrends,

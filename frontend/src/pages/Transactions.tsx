@@ -54,6 +54,18 @@ export const Transactions: React.FC = () => {
     'Spent ₹1,500 on Uber ride',
   ];
 
+  const standardCategories = [
+    'Food',
+    'Utilities',
+    'Entertainment',
+    'Shopping',
+    'Travel',
+    'Savings',
+    'Healthcare',
+    'Education',
+    'Other',
+  ];
+
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) return;
@@ -387,12 +399,39 @@ export const Transactions: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Category"
-              value={editCategory}
-              onChange={(e) => setEditCategory(e.target.value)}
-              required
-            />
+            <div className="flex flex-col space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                Category
+              </label>
+              <select
+                value={standardCategories.includes(editCategory) ? editCategory : 'Other'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'Other') {
+                    setEditCategory('Other');
+                  } else {
+                    setEditCategory(val);
+                  }
+                }}
+                className="h-10 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3.5 text-sm text-zinc-200 focus:outline-none"
+              >
+                {standardCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              {(!standardCategories.includes(editCategory) || editCategory === 'Other') && (
+                <input
+                  type="text"
+                  placeholder="Enter custom category..."
+                  value={editCategory === 'Other' ? '' : editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="mt-1.5 h-10 rounded-xl border border-zinc-800 bg-zinc-950/45 px-3.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+                  required
+                />
+              )}
+            </div>
 
             <Input
               label="Merchant"
