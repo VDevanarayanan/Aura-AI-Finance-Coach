@@ -4,7 +4,7 @@
   "description": "An AI-powered personal finance assistant and coach",
   "private": true,
   "scripts": {
-    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "install:all": "npm install --include=dev && npm install --prefix backend --include=dev && npm install --prefix frontend --include=dev",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev": "npx concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
