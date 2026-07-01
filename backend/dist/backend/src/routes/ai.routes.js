@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ai_controller_1 = require("../controllers/ai.controller");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.use(auth_1.authMiddleware);
+router.post('/chat', ai_controller_1.chatWithCoach);
+router.get('/chat/history', ai_controller_1.getChatHistory);
+router.delete('/chat/history', ai_controller_1.clearChatHistory);
+router.post('/categorize', ai_controller_1.categorizeDescription);
+exports.default = router;
