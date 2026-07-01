@@ -41,6 +41,7 @@ export const Transactions: React.FC = () => {
   const [editCategory, setEditCategory] = useState('');
   const [editMerchant, setEditMerchant] = useState('');
   const [editDate, setEditDate] = useState('');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
 
   // Delete confirm states
   const [deletingTxId, setDeletingTxId] = useState<string | null>(null);
@@ -91,6 +92,11 @@ export const Transactions: React.FC = () => {
     setEditCategory(tx.category);
     setEditMerchant(tx.merchant || '');
     setEditDate(tx.date.split('T')[0]);
+
+    // Check if category is custom (not in standardCategories list and not 'Other')
+    const isCustom = !standardCategories.includes(tx.category) && tx.category !== 'Other';
+    setIsCustomCategory(isCustom);
+
     setIsEditOpen(true);
   };
 
@@ -133,6 +139,19 @@ export const Transactions: React.FC = () => {
 
   // Compute categories list for filtering
   const categories = Array.from(new Set(transactions.map((t) => t.category)));
+
+  const allDropdownCategories = Array.from(new Set([
+    ...categories,
+    'Food',
+    'Utilities',
+    'Entertainment',
+    'Shopping',
+    'Travel',
+    'Savings',
+    'Healthcare',
+    'Education',
+    'Other'
+  ].filter(Boolean)));
 
   // Filter transaction logic
   const filteredTxs = transactions.filter((tx) => {
@@ -193,6 +212,10 @@ export const Transactions: React.FC = () => {
             </div>
 
             {error && <p className="text-xs text-red-400 font-semibold">{error}</p>}
+
+            <p className="text-3xs text-zinc-550 italic pl-0.5 mt-0.5">
+              * Note: Aura AI parses and categorizes descriptions automatically. If it misclassifies an entry, you can click the edit pencil icon in the list below to manually correct any detail.
+            </p>
 
             {/* Quick Suggestions */}
             <div>
@@ -404,28 +427,30 @@ export const Transactions: React.FC = () => {
                 Category
               </label>
               <select
-                value={standardCategories.includes(editCategory) ? editCategory : 'Other'}
+                value={isCustomCategory ? 'Other' : editCategory}
                 onChange={(e) => {
                   const val = e.target.value;
                   if (val === 'Other') {
-                    setEditCategory('Other');
+                    setIsCustomCategory(true);
+                    setEditCategory('');
                   } else {
+                    setIsCustomCategory(false);
                     setEditCategory(val);
                   }
                 }}
                 className="h-10 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3.5 text-sm text-zinc-200 focus:outline-none"
               >
-                {standardCategories.map((cat) => (
+                {allDropdownCategories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
-              {(!standardCategories.includes(editCategory) || editCategory === 'Other') && (
+              {isCustomCategory && (
                 <input
                   type="text"
                   placeholder="Enter custom category..."
-                  value={editCategory === 'Other' ? '' : editCategory}
+                  value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
                   className="mt-1.5 h-10 rounded-xl border border-zinc-800 bg-zinc-950/45 px-3.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700"
                   required
