@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Card } from '../components/Card';
 import { Progress } from '../components/Progress';
+import { Input } from '../components/Input';
+import { Button } from '../components/Button';
 import {
   TrendingUp,
   TrendingDown,
@@ -28,8 +30,23 @@ import {
 } from 'recharts';
 
 export const Dashboard: React.FC = () => {
-  const { transactions, budgets, savingsGoals, currentMonth, setCurrentMonth } =
+  const { transactions, budgets, savingsGoals, currentMonth, setCurrentMonth, addBudget } =
     useFinance();
+
+  const [newOverallLimit, setNewOverallLimit] = useState('');
+  const [setupError, setSetupError] = useState<string | null>(null);
+
+  const handleSetupOverallBudget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOverallLimit || isNaN(parseFloat(newOverallLimit))) return;
+    try {
+      await addBudget('Overall', parseFloat(newOverallLimit));
+      setSetupError(null);
+      setNewOverallLimit('');
+    } catch (err: any) {
+      setSetupError(err.message || 'Failed to set budget.');
+    }
+  };
 
   // Filter transactions for the selected month (format in db is YYYY-MM-DD...)
   const monthlyTxs = transactions.filter((t) => t.date.startsWith(currentMonth));
@@ -45,17 +62,13 @@ export const Dashboard: React.FC = () => {
 
   const totalSavings = totalIncome - totalExpenses;
 
-  const totalBudgetLimit = budgets.reduce((sum, b) => sum + b.limitAmount, 0);
-  const totalBudgetSpent = budgets.reduce((sum, b) => {
-    const categorySpent = monthlyTxs
-      .filter((t) => t.type === 'EXPENSE' && t.category.toLowerCase() === b.category.toLowerCase())
-      .reduce((s, t) => s + t.amount, 0);
-    return sum + categorySpent;
-  }, 0);
-  const budgetRemaining = Math.max(totalBudgetLimit - totalBudgetSpent, 0);
+  // Monthly overall budget is categorized as 'Overall'
+  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'overall');
+  const totalBudgetLimit = overallBudget ? overallBudget.limitAmount : 0;
+  const budgetRemaining = Math.max(totalBudgetLimit - totalExpenses, 0);
   const budgetSpentPercentage =
     totalBudgetLimit > 0
-      ? Math.min(Math.round((totalBudgetSpent / totalBudgetLimit) * 100), 100)
+      ? Math.min(Math.round((totalExpenses / totalBudgetLimit) * 100), 100)
       : 0;
 
   // Chart 1: Income vs Expenses
@@ -149,8 +162,47 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Overall Budget Mandatory Setup Prompt */}
+      {!overallBudget ? (
+        <Card className="max-w-md mx-auto mt-10 border-zinc-805 bg-zinc-900/40 glow-purple">
+          <Card.Header className="text-center pb-4">
+            <div className="mx-auto p-4 bg-purple-950/40 text-purple-400 rounded-full w-fit mb-3">
+              <Sparkles className="h-8 w-8 text-purple-450" />
+            </div>
+            <Card.Title className="text-xl font-bold">Initialize Monthly Budget</Card.Title>
+            <Card.Description className="text-zinc-400 mt-1">
+              To start tracking your finances for <span className="font-semibold text-zinc-200">{currentMonth}</span>, please set your overall monthly spending limit.
+            </Card.Description>
+          </Card.Header>
+          <Card.Content>
+            <form onSubmit={handleSetupOverallBudget} className="space-y-4">
+              {setupError && (
+                <div className="p-3 bg-red-950/30 text-red-400 border border-red-900/50 text-xs font-semibold rounded-xl">
+                  {setupError}
+                </div>
+              )}
+              <Input
+                label="Monthly Spend Limit (₹)"
+                type="number"
+                placeholder="e.g. 35000"
+                value={newOverallLimit}
+                onChange={(e) => setNewOverallLimit(e.target.value)}
+                required
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-full h-11 bg-purple-650 hover:bg-purple-750 text-white font-bold"
+              >
+                Set Budget & Open Dashboard
+              </Button>
+            </form>
+          </Card.Content>
+        </Card>
+      ) : (
+        <>
+          {/* Metrics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Income */}
         <Card className="glow-emerald border-zinc-850">
           <Card.Content className="p-6 flex items-center space-x-4">
@@ -234,7 +286,7 @@ export const Dashboard: React.FC = () => {
             </Card.Description>
           </Card.Header>
           <Card.Content className="space-y-4">
-            <Progress value={totalBudgetSpent} max={totalBudgetLimit} variant="budget" />
+            <Progress value={totalExpenses} max={totalBudgetLimit} variant="budget" />
             <div className="flex items-center justify-between text-sm font-semibold mt-2">
               <span className="text-zinc-400">Spent Status:</span>
               <span className={getPercentageColor(budgetSpentPercentage)}>
@@ -429,6 +481,8 @@ export const Dashboard: React.FC = () => {
           </Card.Content>
         </Card>
       </div>
-    </div>
+    </>
+  )}
+</div>
   );
 };

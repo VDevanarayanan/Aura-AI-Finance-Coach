@@ -106,6 +106,16 @@ export const Budgets: React.FC = () => {
     }
   };
 
+  // Find overall monthly budget (category: 'Overall')
+  const overallBudget = budgets.find((b) => b.category.toLowerCase() === 'overall');
+  // Filter out overall budget for the category sub-budgets grid
+  const categoryBudgets = budgets.filter((b) => b.category.toLowerCase() !== 'overall');
+
+  // Compute total expenses for current selected month to show in overall budget card
+  const totalExpenses = transactions
+    .filter((t) => t.date.startsWith(currentMonth) && t.type === 'EXPENSE')
+    .reduce((sum, t) => sum + t.amount, 0);
+
   // Helper to compute actual spending in a budget category for current selected month
   const getCategorySpending = (category: string) => {
     return transactions
@@ -154,31 +164,98 @@ export const Budgets: React.FC = () => {
         </div>
       </div>
 
-      {/* Budgets Grid */}
-      {budgets.length === 0 ? (
-        <Card className="text-center py-20 border-zinc-850 bg-zinc-900/40">
-          <Card.Content className="flex flex-col items-center">
-            <div className="p-4 bg-zinc-950/40 text-zinc-500 rounded-full mb-4">
-              <PiggyBank className="h-10 w-10" />
+      {/* Overall Monthly Budget Card */}
+      {overallBudget ? (
+        <Card className="border-zinc-800 bg-zinc-900/40 glow-purple">
+          <Card.Header className="flex flex-row items-center justify-between pb-3">
+            <div>
+              <span className="text-3xs uppercase tracking-widest font-black text-purple-400">
+                Primary Budget Target
+              </span>
+              <Card.Title className="text-xl mt-0.5">Overall Monthly Spend Limit</Card.Title>
             </div>
-            <h3 className="font-bold text-lg text-zinc-200">
-              No Budgets Set For This Month
-            </h3>
-            <p className="text-sm text-zinc-400 mt-1 max-w-sm">
-              Keep your expenses under control by establishing budgets for categories like Food, Travel, or Entertainment.
-            </p>
             <Button
-              onClick={openAddModal}
-              variant="secondary"
-              className="mt-5 font-bold"
+              onClick={() => handleEditClick(overallBudget)}
+              variant="outline"
+              className="h-9 px-3.5 text-xs font-semibold flex items-center space-x-1.5"
             >
-              Set First Budget Limit
+              <Edit2 className="h-3.5 w-3.5" />
+              <span>Modify Limit</span>
             </Button>
+          </Card.Header>
+          <Card.Content className="space-y-4">
+            <Progress value={totalExpenses} max={overallBudget.limitAmount} variant="budget" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
+              <span className="text-zinc-400 font-semibold">
+                {totalExpenses > overallBudget.limitAmount ? (
+                  <span className="text-red-400 font-bold flex items-center gap-1">
+                    <AlertTriangle className="h-4.5 w-4.5 shrink-0" />
+                    Overspent overall budget by ₹{(totalExpenses - overallBudget.limitAmount).toLocaleString()}
+                  </span>
+                ) : (
+                  <span>₹{(overallBudget.limitAmount - totalExpenses).toLocaleString()} Remaining of ₹{overallBudget.limitAmount.toLocaleString()} Limit</span>
+                )}
+              </span>
+              <span className="font-black text-zinc-50">
+                ₹{totalExpenses.toLocaleString()} Total Spent (All Categories)
+              </span>
+            </div>
           </Card.Content>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {budgets.map((b) => {
+        <Card className="border-dashed border-zinc-800 bg-zinc-900/10">
+          <Card.Content className="py-6 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-purple-950/40 text-purple-400 rounded-lg animate-pulse">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-zinc-200">No Overall Monthly Budget Set</h4>
+                <p className="text-xs text-zinc-500 mt-0.5">Initialize your monthly spending limit to unlock full dashboard tracking.</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => {
+                setIsCustomCategory(false);
+                setNewCategory('Overall');
+                setIsAddOpen(true);
+              }}
+              variant="secondary"
+              className="text-xs h-9 px-4 font-bold"
+            >
+              Set Limit
+            </Button>
+          </Card.Content>
+        </Card>
+      )}
+
+      {/* Category Sub-budgets Grid Section */}
+      <div className="space-y-4 pt-2">
+        <h2 className="text-lg font-bold text-zinc-300">Category Sub-Budgets</h2>
+        {categoryBudgets.length === 0 ? (
+          <Card className="text-center py-12 border-zinc-850 bg-zinc-900/40">
+            <Card.Content className="flex flex-col items-center">
+              <div className="p-4 bg-zinc-950/40 text-zinc-500 rounded-full mb-4">
+                <PiggyBank className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-base text-zinc-200">
+                No Category Budgets Set
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1 max-w-sm">
+                Establish budgets for specific categories like Food, Travel, or Entertainment to track sub-allocations.
+              </p>
+              <Button
+                onClick={openAddModal}
+                variant="secondary"
+                className="mt-4 text-xs h-9 px-4 font-bold"
+              >
+                Set Category Budget
+              </Button>
+            </Card.Content>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {categoryBudgets.map((b) => {
             const spent = getCategorySpending(b.category);
             const remaining = b.limitAmount - spent;
             const isOverspent = spent > b.limitAmount;
@@ -234,6 +311,7 @@ export const Budgets: React.FC = () => {
           })}
         </div>
       )}
+      </div>
 
       {/* Set Budget Modal */}
       <Modal
