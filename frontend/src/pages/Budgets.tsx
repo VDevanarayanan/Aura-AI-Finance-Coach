@@ -23,6 +23,7 @@ export const Budgets: React.FC = () => {
   const [newCategory, setNewCategory] = useState('');
   const [newLimit, setNewLimit] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
 
   // Edit states
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -46,6 +47,14 @@ export const Budgets: React.FC = () => {
     'Other',
   ];
 
+  const openAddModal = () => {
+    setNewCategory('');
+    setNewLimit('');
+    setIsCustomCategory(false);
+    setError(null);
+    setIsAddOpen(true);
+  };
+
   const handleCreateBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategory || !newLimit) return;
@@ -56,6 +65,7 @@ export const Budgets: React.FC = () => {
       setIsAddOpen(false);
       setNewCategory('');
       setNewLimit('');
+      setIsCustomCategory(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create budget.');
     }
@@ -134,7 +144,7 @@ export const Budgets: React.FC = () => {
           </div>
 
           <Button
-            onClick={() => setIsAddOpen(true)}
+            onClick={openAddModal}
             variant="primary"
             className="h-11 bg-zinc-50 text-zinc-900 hover:bg-zinc-200 font-bold"
           >
@@ -158,7 +168,7 @@ export const Budgets: React.FC = () => {
               Keep your expenses under control by establishing budgets for categories like Food, Travel, or Entertainment.
             </p>
             <Button
-              onClick={() => setIsAddOpen(true)}
+              onClick={openAddModal}
               variant="secondary"
               className="mt-5 font-bold"
             >
@@ -243,8 +253,17 @@ export const Budgets: React.FC = () => {
               Budget Category
             </label>
             <select
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
+              value={isCustomCategory ? 'Other' : newCategory}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === 'Other') {
+                  setIsCustomCategory(true);
+                  setNewCategory('');
+                } else {
+                  setIsCustomCategory(false);
+                  setNewCategory(val);
+                }
+              }}
               required
               className="h-10 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3.5 text-sm text-zinc-200 focus:outline-none"
             >
@@ -255,12 +274,16 @@ export const Budgets: React.FC = () => {
                 </option>
               ))}
             </select>
-            <p className="text-3xs text-zinc-500 pl-0.5">Or enter a custom category below</p>
-            <Input
-              placeholder="Or enter custom category name"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-            />
+            {isCustomCategory && (
+              <div className="mt-2">
+                <Input
+                  placeholder="Enter custom category name"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <Input

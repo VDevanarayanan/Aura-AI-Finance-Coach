@@ -46,10 +46,16 @@ export const Dashboard: React.FC = () => {
   const totalSavings = totalIncome - totalExpenses;
 
   const totalBudgetLimit = budgets.reduce((sum, b) => sum + b.limitAmount, 0);
-  const budgetRemaining = Math.max(totalBudgetLimit - totalExpenses, 0);
+  const totalBudgetSpent = budgets.reduce((sum, b) => {
+    const categorySpent = monthlyTxs
+      .filter((t) => t.type === 'EXPENSE' && t.category.toLowerCase() === b.category.toLowerCase())
+      .reduce((s, t) => s + t.amount, 0);
+    return sum + categorySpent;
+  }, 0);
+  const budgetRemaining = Math.max(totalBudgetLimit - totalBudgetSpent, 0);
   const budgetSpentPercentage =
     totalBudgetLimit > 0
-      ? Math.min(Math.round((totalExpenses / totalBudgetLimit) * 100), 100)
+      ? Math.min(Math.round((totalBudgetSpent / totalBudgetLimit) * 100), 100)
       : 0;
 
   // Chart 1: Income vs Expenses
@@ -228,7 +234,7 @@ export const Dashboard: React.FC = () => {
             </Card.Description>
           </Card.Header>
           <Card.Content className="space-y-4">
-            <Progress value={totalExpenses} max={totalBudgetLimit} variant="budget" />
+            <Progress value={totalBudgetSpent} max={totalBudgetLimit} variant="budget" />
             <div className="flex items-center justify-between text-sm font-semibold mt-2">
               <span className="text-zinc-400">Spent Status:</span>
               <span className={getPercentageColor(budgetSpentPercentage)}>
