@@ -5,7 +5,7 @@
   "main": "dist/backend/src/app.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc",
+    "build": "npm run db:generate && tsc",
     "start": "node dist/backend/src/app.js",
     "db:generate": "npx prisma generate --schema=../database/prisma/schema.prisma",
     "db:migrate": "npx prisma migrate dev --schema=../database/prisma/schema.prisma",

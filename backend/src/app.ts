@@ -3,23 +3,28 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import path from 'path';
+import fs from 'fs';
 
 const envPath = path.resolve(__dirname, '../../.env');
 console.log('[DEBUG] __dirname is:', __dirname);
 console.log('[DEBUG] Resolved envPath is:', envPath);
 
-// Load environment variables relative to this source file
-const envResult = dotenv.config({ path: envPath, override: true });
-if (envResult.error) {
-  console.error('[DEBUG] dotenv load error:', envResult.error);
-} else {
-  console.log('[DEBUG] dotenv loaded successfully. keys:', Object.keys(envResult.parsed || {}));
-  // Force manual override copy to process.env
-  if (envResult.parsed) {
-    for (const key of Object.keys(envResult.parsed)) {
-      process.env[key] = envResult.parsed[key];
+if (fs.existsSync(envPath)) {
+  // Load environment variables relative to this source file
+  const envResult = dotenv.config({ path: envPath, override: true });
+  if (envResult.error) {
+    console.error('[DEBUG] dotenv load error:', envResult.error);
+  } else {
+    console.log('[DEBUG] dotenv loaded successfully. keys:', Object.keys(envResult.parsed || {}));
+    // Force manual override copy to process.env
+    if (envResult.parsed) {
+      for (const key of Object.keys(envResult.parsed)) {
+        process.env[key] = envResult.parsed[key];
+      }
     }
   }
+} else {
+  console.log('[DEBUG] No local .env file found. Using process environment variables.');
 }
 
 console.log('[DEBUG] process.env.PORT is:', process.env.PORT);
