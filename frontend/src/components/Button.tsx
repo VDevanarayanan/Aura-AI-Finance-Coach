@@ -29,9 +29,24 @@ export const Button: React.FC<ButtonProps> = ({
       'border border-zinc-200 bg-transparent hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50',
   };
 
+  // Dynamic override filtering to prevent Tailwind specificity clashes
+  let variantStyles = variants[variant] || '';
+  if (className.includes('bg-')) {
+    variantStyles = variantStyles
+      .split(' ')
+      .filter((c) => !c.startsWith('bg-') && !c.startsWith('dark:bg-') && !c.startsWith('hover:bg-') && !c.startsWith('dark:hover:bg-'))
+      .join(' ');
+  }
+  if (className.includes('text-')) {
+    variantStyles = variantStyles
+      .split(' ')
+      .filter((c) => !c.startsWith('text-') && !c.startsWith('dark:text-') && !c.startsWith('hover:text-') && !c.startsWith('dark:hover:text-'))
+      .join(' ');
+  }
+
   return (
     <button
-      className={`${baseStyle} ${variants[variant]} ${className}`}
+      className={`${baseStyle} ${variantStyles} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >
