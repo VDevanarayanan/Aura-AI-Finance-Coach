@@ -341,10 +341,10 @@ export const Dashboard: React.FC = () => {
                         <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-                    <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} stroke="#a1a1aa" />
-                    <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="#a1a1aa" />
-                    <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px' }} formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Amount']} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--zinc-800)" />
+                    <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} stroke="var(--zinc-400)" />
+                    <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="var(--zinc-400)" />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--zinc-900)', borderColor: 'var(--zinc-800)', borderRadius: '12px', color: 'var(--zinc-50)' }} formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Amount']} />
                     <Area type="monotone" dataKey="amount" stroke="#ec4899" strokeWidth={2.5} fillOpacity={1} fill="url(#colorSpend)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -415,10 +415,10 @@ export const Dashboard: React.FC = () => {
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} barGap={8}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="#a1a1aa" />
-                  <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="#a1a1aa" />
-                  <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px' }} formatter={(value: any) => `₹${value.toLocaleString()}`} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--zinc-800)" />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="var(--zinc-400)" />
+                  <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="var(--zinc-400)" />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--zinc-900)', borderColor: 'var(--zinc-800)', borderRadius: '12px', color: 'var(--zinc-50)' }} formatter={(value: any) => `₹${value.toLocaleString()}`} />
                   <Legend />
                   <Bar dataKey="Income" fill="#10b981" radius={[8, 8, 0, 0]} />
                   <Bar dataKey="Expenses" fill="#f43f5e" radius={[8, 8, 0, 0]} />
